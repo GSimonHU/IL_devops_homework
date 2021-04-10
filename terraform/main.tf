@@ -55,4 +55,29 @@ resource "aws_db_instance" "postgres-RDS" {
 
 # ECR for Docker image pushed by Jenkins from EC2
 
+resource "aws_ecr_repository" "my-python-app" {
+  name = "my-python-app"
+}
+
+# todo EC2 IAM role for principle 
+resource "aws_ecr_repository_policy" "ecr-policy" {
+  repository = aws_ecr_repository.my-python-app.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "EC2PutImage"
+        Effect    = "Allow"
+        Principal = "*"
+        Action = [
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+        ]
+      },
+    ]
+  })
+}
+
 # EC2 for Jenkins pipeline
