@@ -15,7 +15,6 @@ resource "aws_s3_bucket" "static-website-bucket" {
   }
 }
 
-# todo EC2 IAM role for principle
 resource "aws_s3_bucket_policy" "bucket-policy" {
   bucket = aws_s3_bucket.static-website-bucket.id
   policy = jsonencode({
@@ -25,7 +24,7 @@ resource "aws_s3_bucket_policy" "bucket-policy" {
       {
         Sid       = "EC2PutObject"
         Effect    = "Allow"
-        Principal = "*"
+        Principal = "${aws_iam_role.EC2_role_for_Jenkins.arn}"
         Action    = "s3:PutObject"
         Resource  = "arn:aws:s3:::s3-static-website/*"
       },
@@ -44,7 +43,6 @@ resource "aws_db_instance" "postgres-RDS" {
   password          = data.aws_ssm_parameter.DB_PASSWORD.value
 }
 
-# todo EC2 security group id
 resource "aws_db_security_group" "postgres-RDS-SG" {
   name = "postgres-RDS-SG"
 
@@ -54,12 +52,10 @@ resource "aws_db_security_group" "postgres-RDS-SG" {
 }
 
 # ECR for Docker image pushed by Jenkins from EC2
-
 resource "aws_ecr_repository" "my-python-app-repo" {
   name = "my-python-app-repo"
 }
 
-# todo EC2 IAM role for principle 
 resource "aws_ecr_repository_policy" "ecr-policy" {
   repository = aws_ecr_repository.my-python-app-repo.name
   policy = jsonencode({
@@ -68,7 +64,7 @@ resource "aws_ecr_repository_policy" "ecr-policy" {
       {
         Sid       = "EC2PutImage"
         Effect    = "Allow"
-        Principal = "*"
+        Principal = "${aws_iam_role.EC2_role_for_Jenkins.arn}"
         Action = [
           "ecr:PutImage",
           "ecr:InitiateLayerUpload",
@@ -131,3 +127,35 @@ resource "aws_security_group" "ec2-jenkins-sg" {
   }
 }
 
+resource "aws_iam_role" "EC2_role_for_Jenkins" {
+  name = "EC2_role_for_Jenkins"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "ecr:PutImage",
+        Resource = "${aws_ecr_repository.my-python-app-repo.arn}/*"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+      {
+        Effect   = "Allow"
+        Action   = "ssm:GetParameters",
+        Resource = "*",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+      {
+        Effect   = "Allow"
+        Action   = "s3:PutObject",
+        Resource = "${aws_s3_bucket.static-website-bucket.arn}/*"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
