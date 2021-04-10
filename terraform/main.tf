@@ -1,10 +1,10 @@
 provider "aws" {
   profile = "default"
-  region = "eu-central-1"
+  region  = "eu-central-1"
 }
 
 # SSM Parameterstore already filled with parameters via management console
-# Parameter names: DB_DBNAME, DB_ENDPOINT, DB_PASSWORD, DB_PORT, DB_REGION, DB_USER
+# Parameter names: DB_DBNAME, DB_PASSWORD, DB_USER
 
 # S3 bucket for static website
 resource "aws_s3_bucket" "static-website-bucket" {
@@ -27,13 +27,31 @@ resource "aws_s3_bucket_policy" "bucket-policy" {
         Effect    = "Allow"
         Principal = "*"
         Action    = "s3:PutObject"
-        Resource = "arn:aws:s3:::s3-static-website/*"
+        Resource  = "arn:aws:s3:::s3-static-website/*"
       },
     ]
   })
 }
 
 # RDS (postgreSQL) to connect to from EC2
+resource "aws_db_instance" "postgres-RDS" {
+  allocated_storage = 20
+  engine            = "postgresql"
+  engine_version    = "12.5"
+  instance_class    = "db.t2.micro"
+  name              = data.aws_ssm_parameter.DB_DBNAME.value
+  username          = data.aws_ssm_parameter.DB_USER.value
+  password          = data.aws_ssm_parameter.DB_PASSWORD.value
+}
+
+# todo EC2 security group id
+# resource "aws_db_security_group" "postgres-RDS-SG" {
+#   name = "postgres-RDS-SG"
+
+#   ingress {
+#     security_group_id = "value"
+#   }
+# }
 
 # ECR for Docker image pushed by Jenkins from EC2
 
