@@ -14,21 +14,23 @@ data "aws_ssm_parameter" "DB_PASSWORD" {
   name = "DB_PASSWORD"
 }
 
-
 resource "aws_ssm_parameter" "DB_PORT" {
-  name  = "DB_PORT"
-  type  = "String"
-  value = aws_db_instance.postgres-RDS.port
+  name      = "DB_PORT"
+  type      = "String"
+  overwrite = true
+  value     = aws_db_instance.postgres-RDS.port
 }
 
 resource "aws_ssm_parameter" "DB_REGION" {
-  name  = "DB_REGION"
-  type  = "String"
-  value = "eu-cental-1"
+  name      = "DB_REGION"
+  type      = "String"
+  overwrite = true
+  value     = "eu-cental-1"
 }
 
 resource "aws_ssm_parameter" "DB_ENDPOINT" {
-  name  = "DB_REGION"
-  type  = "String"
-  value = aws_db_instance.postgres-RDS.endpoint
+  name      = "DB_ENDPOINT"
+  type      = "String"
+  overwrite = true
+  value     = aws_db_instance.postgres-RDS.endpoint
 }
