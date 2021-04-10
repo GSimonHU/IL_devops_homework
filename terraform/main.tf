@@ -45,23 +45,23 @@ resource "aws_db_instance" "postgres-RDS" {
 }
 
 # todo EC2 security group id
-# resource "aws_db_security_group" "postgres-RDS-SG" {
-#   name = "postgres-RDS-SG"
+resource "aws_db_security_group" "postgres-RDS-SG" {
+  name = "postgres-RDS-SG"
 
-#   ingress {
-#     security_group_id = "value"
-#   }
-# }
+  ingress {
+    security_group_id = aws_security_group.ec2-jenkins-sg.id
+  }
+}
 
 # ECR for Docker image pushed by Jenkins from EC2
 
-resource "aws_ecr_repository" "my-python-app" {
-  name = "my-python-app"
+resource "aws_ecr_repository" "my-python-app-repo" {
+  name = "my-python-app-repo"
 }
 
 # todo EC2 IAM role for principle 
 resource "aws_ecr_repository_policy" "ecr-policy" {
-  repository = aws_ecr_repository.my-python-app.name
+  repository = aws_ecr_repository.my-python-app-repo.name
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -81,3 +81,53 @@ resource "aws_ecr_repository_policy" "ecr-policy" {
 }
 
 # EC2 for Jenkins pipeline
+resource "aws_instance" "ec2-jenkins" {
+  ami                         = "ami-0e0102e3ff768559b"
+  instance_type               = "t2.micro"
+  key_name                    = "il-homework-key"
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.ec2-jenkins-sg.id]
+
+  tags = {
+    Name = "ec2-jenkins"
+  }
+
+  # user_data = <<EOF
+  # #!/bin/sh
+  # sudo apt-get update
+  # sudo apt-get install -y mysql-server
+  # EOF
+}
+
+resource "aws_security_group" "ec2-jenkins-sg" {
+  name = "ec2-jenkins-sg"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 8080
+    to_port     = 8080
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol  = "-1"
+    from_port = 0
+    to_port   = 0
+    self      = true
+  }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
