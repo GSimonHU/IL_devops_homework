@@ -3,9 +3,6 @@ provider "aws" {
   region  = "eu-central-1"
 }
 
-# SSM Parameterstore already filled with parameters via management console
-# Parameter names: DB_DBNAME, DB_PASSWORD, DB_USER
-
 # S3 bucket for static website
 resource "aws_s3_bucket" "static-website-bucket" {
   bucket = "infinite-lambda-static-website-bucket"
@@ -33,7 +30,7 @@ resource "aws_ecr_repository" "my-python-app-repo" {
   name = "my-python-app-repo"
 }
 
-# EC2 for Jenkins pipeline
+# EC2 for Jenkins pipeline + SG
 resource "aws_instance" "ec2-jenkins" {
   ami                         = "ami-0e0102e3ff768559b"
   instance_type               = "t2.micro"
@@ -83,70 +80,4 @@ resource "aws_security_group" "ec2-jenkins-sg" {
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-
-resource "aws_iam_role" "EC2_role_for_Jenkins" {
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_policy" "policy_for_EC2" {
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": [
-        "ecr:PutImage"
-      ],
-      "Effect": "Allow",
-      "Resource": "${aws_ecr_repository.my-python-app-repo.arn}"
-    },
-    {
-      "Action": [
-        "ssm:GetParameters"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-          "${aws_ssm_parameter.DB_PORT.arn}",
-          "${aws_ssm_parameter.DB_REGION.arn}",
-          "${aws_ssm_parameter.DB_ENDPOINT.arn}",
-          "${data.aws_ssm_parameter.DB_DBNAME.arn}",
-          "${data.aws_ssm_parameter.DB_USER.arn}",
-          "${data.aws_ssm_parameter.DB_PASSWORD.arn}"
-      ]
-    },
-    {
-      "Action": [
-        "s3:PutObject"
-      ],
-      "Effect": "Allow",
-      "Resource": "${aws_s3_bucket.static-website-bucket.arn}/*"
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  role = aws_iam_role.EC2_role_for_Jenkins.name
-}
-
-resource "aws_iam_role_policy_attachment" "role-attach" {
-  role       = aws_iam_role.EC2_role_for_Jenkins.name
-  policy_arn = aws_iam_policy.policy_for_EC2.arn
 }
