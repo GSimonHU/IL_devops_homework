@@ -32,6 +32,7 @@ resource "aws_iam_policy" "policy_for_EC2" {
     },
     {
       "Action": [
+        "ssm:GetParameter",
         "ssm:GetParameters"
       ],
       "Effect": "Allow",
