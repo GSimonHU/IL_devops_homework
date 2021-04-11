@@ -32,5 +32,5 @@ resource "aws_ssm_parameter" "DB_ENDPOINT" {
   name      = "DB_ENDPOINT"
   type      = "String"
   overwrite = true
-  value     = aws_db_instance.postgres-RDS.endpoint
+  value     = aws_db_instance.postgres-RDS.address
 }
