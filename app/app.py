@@ -1,7 +1,8 @@
 import boto3
 import psycopg2
 
-ssm = boto3.client('ssm')
+DEFAULT_REGION='eu-central-1'
+ssm = boto3.client('ssm', DEFAULT_REGION)
 ENDPOINT=ssm.get_parameter(Name='DB_ENDPOINT', WithDecryption=True)['Parameter']['Value']
 PORT=ssm.get_parameter(Name='DB_PORT', WithDecryption=True)['Parameter']['Value']
 USER=ssm.get_parameter(Name='DB_USER', WithDecryption=True)['Parameter']['Value']
