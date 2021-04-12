@@ -45,7 +45,6 @@ resource "aws_iam_policy" "policy_for_EC2" {
           "${aws_ssm_parameter.DB_PORT.arn}",
           "${aws_ssm_parameter.DB_REGION.arn}",
           "${aws_ssm_parameter.DB_ENDPOINT.arn}",
-          "${aws_ssm_parameter.REPO_URL.arn}",
           "${data.aws_ssm_parameter.DB_DBNAME.arn}",
           "${data.aws_ssm_parameter.DB_USER.arn}",
           "${data.aws_ssm_parameter.DB_PASSWORD.arn}"
