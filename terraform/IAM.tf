@@ -25,10 +25,15 @@ resource "aws_iam_policy" "policy_for_EC2" {
   "Statement": [
     {
       "Action": [
-        "ecr:PutImage"
+        "ecr:PutImage",
+        "ecr:InitiateLayerUpload",
+        "ecr:GetAuthorizationToken",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:BatchCheckLayerAvailability"
       ],
       "Effect": "Allow",
-      "Resource": "${aws_ecr_repository.my-python-app-repo.arn}"
+      "Resource": "*"
     },
     {
       "Action": [

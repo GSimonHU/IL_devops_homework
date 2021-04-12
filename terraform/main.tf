@@ -12,6 +12,25 @@ resource "aws_s3_bucket" "static-website-bucket" {
   }
 }
 
+resource "aws_s3_bucket_policy" "static-website-bucket-policy" {
+  bucket = aws_s3_bucket.static-website-bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Id      = "MYBUCKETPOLICY"
+    Statement = [
+      {
+        Sid       = "PublicReadGetObject"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "arn:aws:s3:::infinite-lambda-static-website-bucket/index.html"
+      },
+    ]
+  })
+}
+
+
 # RDS (postgreSQL) to connect to from EC2
 resource "aws_db_instance" "postgres-RDS" {
   allocated_storage      = 20
