@@ -1,6 +1,6 @@
 # SSM Parameterstore already filled with parameters via management console 
 # for DB_DBNAME, DB_USER, DB_PASSWORD
-# Parameter names: DB_DBNAME, DB_ENDPOINT, DB_PASSWORD, DB_PORT, DB_REGION, DB_USER
+# Parameter names: DB_DBNAME, DB_ENDPOINT, DB_PASSWORD, DB_PORT, DB_REGION, DB_USER, REPO_URL
 
 data "aws_ssm_parameter" "DB_DBNAME" {
   name = "DB_DBNAME"
@@ -33,4 +33,11 @@ resource "aws_ssm_parameter" "DB_ENDPOINT" {
   type      = "String"
   overwrite = true
   value     = aws_db_instance.postgres-RDS.address
+}
+
+resource "aws_ssm_parameter" "REPO_URL" {
+  name      = "REPO_URL"
+  type      = "String"
+  overwrite = true
+  value     = aws_ecr_repository.my-python-app-repo.repository_url
 }
