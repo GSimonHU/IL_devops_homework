@@ -10,6 +10,7 @@ resource "aws_s3_bucket" "static-website-bucket" {
   website {
     index_document = "index.html"
   }
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_policy" "static-website-bucket-policy" {
