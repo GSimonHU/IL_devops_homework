@@ -9,9 +9,9 @@ pipeline {
 
     stage('Building image and running it') {
       steps {
-        dir("app"){
+        dir(path: 'app') {
           script {
-            dockerImage = docker.build registry
+            sh 'docker build -t $IMAGE_NAME .'
             sh 'docker run $IMAGE_NAME'
           }
         }
@@ -22,7 +22,8 @@ pipeline {
       steps {
         script {
           sh 'aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin $ECR_PATH'
-          sh 'docker push $REGISTRY'
+          sh 'docker tag $IMAGE_NAME:latest $ECR_PATH/$IMAGE_NAME:latest'
+          sh 'docker push $ECR_PATH/$IMAGE_NAME:latest'
         }
 
       }
@@ -30,7 +31,7 @@ pipeline {
 
     stage('Deploy Static Website to S3') {
       steps {
-        dir("static_website"){
+        dir(path: 'static_website') {
           script {
             sh 'aws s3 cp ./index.html $BUCKET_PATH'
           }
@@ -40,8 +41,7 @@ pipeline {
 
   }
   environment {
-    REGISTRY = '129623116923.dkr.ecr.eu-central-1.amazonaws.com/my-python-app-repo'
-    IMAGE_NAME = '129623116923.dkr.ecr.eu-central-1.amazonaws.com/my-python-app-repo'
+    IMAGE_NAME = 'my-python-app-repo'
     ECR_PATH = '129623116923.dkr.ecr.eu-central-1.amazonaws.com'
     BUCKET_PATH = 's3://infinite-lambda-static-website-bucket'
   }
