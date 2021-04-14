@@ -31,3 +31,7 @@ sudo sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > \
     /etc/apt/sources.list.d/jenkins.list'
 sudo apt-get update
 sudo apt-get install -y jenkins
+
+# Docker configure for jenkins
+sudo usermod -a -G docker jenkins
+sudo systemctl restart jenkins
