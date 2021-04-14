@@ -1,6 +1,7 @@
 # IAM resources for EC2
 
 resource "aws_iam_role" "EC2_role_for_Jenkins" {
+  name = "EC2_role_for_Jenkins"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -19,6 +20,7 @@ EOF
 }
 
 resource "aws_iam_policy" "policy_for_EC2" {
+  name = "policy_for_EC2"
   policy = <<EOF
 {
   "Version": "2012-10-17",

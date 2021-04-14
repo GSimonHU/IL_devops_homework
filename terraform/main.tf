@@ -34,6 +34,7 @@ resource "aws_s3_bucket_policy" "static-website-bucket-policy" {
 
 # RDS (postgreSQL) to connect to from EC2
 resource "aws_db_instance" "postgres-RDS" {
+  identifier             = "postgres-rds"
   allocated_storage      = 20
   engine                 = "postgres"
   engine_version         = "12.5"
